@@ -1,0 +1,74 @@
+{% import '_includes/forms' as forms %}
+
+<h2>{{ 'Output'|t('seo-by-roogul') }}</h2>
+
+{{ forms.lightswitchField({
+  label: 'Auto-inject tags'|t('seo-by-roogul'),
+  instructions: 'Adds the title, meta, social tags and JSON-LD through `{{ head() }}`. Turn off to place `{{ craft.seoByRoogul.render() }}` yourself.'|t('seo-by-roogul'),
+  name: 'autoInject',
+  on: settings.autoInject,
+}) }}
+
+{{ forms.textField({
+  label: 'Production environments'|t('seo-by-roogul'),
+  instructions: 'Comma-separated `CRAFT_ENVIRONMENT` values that search engines may index. Everything else gets noindex and a disallow-all robots.txt. If `CRAFT_ENVIRONMENT` isn’t set, indexing is allowed.'|t('seo-by-roogul'),
+  name: 'productionEnvironments',
+  value: settings.productionEnvironments,
+  class: 'code',
+}) }}
+
+{{ forms.textField({
+  label: 'Share image width'|t('seo-by-roogul'),
+  name: 'imageWidth',
+  type: 'number',
+  value: settings.imageWidth,
+  errors: settings.getErrors('imageWidth'),
+  size: 6,
+}) }}
+
+{{ forms.textField({
+  label: 'Share image height'|t('seo-by-roogul'),
+  name: 'imageHeight',
+  type: 'number',
+  value: settings.imageHeight,
+  errors: settings.getErrors('imageHeight'),
+  size: 6,
+}) }}
+
+<hr>
+<h2>{{ 'Sitemap'|t('seo-by-roogul') }}</h2>
+
+{{ forms.lightswitchField({
+  label: 'Enable sitemap.xml'|t('seo-by-roogul'),
+  name: 'sitemapEnabled',
+  on: settings.sitemapEnabled,
+}) }}
+
+{% if sources|length %}
+  <div class="field">
+    <div class="heading"><label>{{ 'Include in sitemap'|t('seo-by-roogul') }}</label></div>
+    <div class="instructions"><p>{{ 'Entries marked noindex, or with a canonical URL pointing elsewhere, are always left out.'|t('seo-by-roogul') }}</p></div>
+    <div class="input">
+      {% for source in sources %}
+        {{ forms.lightswitchField({
+          label: source.label,
+          name: 'sitemapSources[' ~ source.key ~ ']',
+          on: settings.isSourceIncluded(source.key),
+          small: true,
+        }) }}
+      {% endfor %}
+    </div>
+  </div>
+{% else %}
+  <p class="light">{{ 'No sections, category groups or product types have URLs yet.'|t('seo-by-roogul') }}</p>
+{% endif %}
+
+<hr>
+<h2>{{ 'robots.txt'|t('seo-by-roogul') }}</h2>
+
+{{ forms.lightswitchField({
+  label: 'Serve robots.txt'|t('seo-by-roogul'),
+  instructions: 'Edit the contents per site under SEO → Globals. Delete any physical `web/robots.txt`, or the web server will serve that instead.'|t('seo-by-roogul'),
+  name: 'robotsEnabled',
+  on: settings.robotsEnabled,
+}) }}

@@ -1,0 +1,85 @@
+{% import '_includes/forms' as forms %}
+
+<div id="{{ id }}" class="seobr" data-config="{{ configJson }}">
+
+  <div class="seobr-preview" aria-hidden="true">
+    <div class="seobr-preview__url" data-seobr-url></div>
+    <div class="seobr-preview__title" data-seobr-preview-title></div>
+    <div class="seobr-preview__desc" data-seobr-preview-desc></div>
+  </div>
+
+  {{ forms.textField({
+    label: 'Title'|t('seo-by-roogul'),
+    id: field.handle ~ '-title',
+    name: field.handle ~ '[title]',
+    value: data.title,
+    placeholder: fallbacks and fallbacks.title ? fallbacks.title : null,
+    inputAttributes: { 'data-seobr-title': true },
+    tip: fallbacks and fallbacks.isHomepage ? 'Leave blank to use just the site name on the homepage.'|t('seo-by-roogul') : null,
+  }) }}
+  <p class="seobr-count" data-seobr-title-count></p>
+
+  {{ forms.lightswitchField({
+    label: 'Use title exactly as written'|t('seo-by-roogul'),
+    instructions: 'Don’t add the site name from the title template.'|t('seo-by-roogul'),
+    id: field.handle ~ '-rawTitle',
+    name: field.handle ~ '[rawTitle]',
+    on: data.rawTitle,
+    small: true,
+  }) }}
+
+  {{ forms.textareaField({
+    label: 'Description'|t('seo-by-roogul'),
+    id: field.handle ~ '-description',
+    name: field.handle ~ '[description]',
+    value: data.description,
+    placeholder: fallbacks and fallbacks.description ? fallbacks.description : null,
+    rows: 3,
+    inputAttributes: { 'data-seobr-desc': true },
+  }) }}
+  <p class="seobr-count" data-seobr-desc-count></p>
+
+  {{ forms.elementSelectField({
+    label: 'Share image'|t('seo-by-roogul'),
+    instructions: fallbacks and fallbacks.image
+      ? 'Leave empty to use {name}.'|t('seo-by-roogul', { name: fallbacks.image.title })
+      : 'Cropped to 1200×630 for social sharing.'|t('seo-by-roogul'),
+    id: field.handle ~ '-imageId',
+    name: field.handle ~ '[imageId]',
+    elementType: 'craft\\elements\\Asset',
+    elements: data.getImage() ? [data.getImage()] : [],
+    criteria: { kind: ['image'] },
+    limit: 1,
+    viewMode: 'large',
+  }) }}
+
+  <details class="seobr-advanced"{% if data.canonical or data.noindex or data.nofollow %} open{% endif %}>
+    <summary>{{ 'Advanced'|t('seo-by-roogul') }}</summary>
+
+    {{ forms.textField({
+      label: 'Canonical URL'|t('seo-by-roogul'),
+      instructions: 'Only set this if the content’s main version lives at another URL. Entries pointing elsewhere are left out of the sitemap.'|t('seo-by-roogul'),
+      id: field.handle ~ '-canonical',
+      name: field.handle ~ '[canonical]',
+      value: data.canonical,
+      placeholder: fallbacks ? fallbacks.url : null,
+      type: 'url',
+    }) }}
+
+    {{ forms.lightswitchField({
+      label: 'Hide from search engines (noindex)'|t('seo-by-roogul'),
+      id: field.handle ~ '-noindex',
+      name: field.handle ~ '[noindex]',
+      on: data.noindex,
+      small: true,
+    }) }}
+
+    {{ forms.lightswitchField({
+      label: 'Don’t follow links on this page (nofollow)'|t('seo-by-roogul'),
+      id: field.handle ~ '-nofollow',
+      name: field.handle ~ '[nofollow]',
+      on: data.nofollow,
+      small: true,
+    }) }}
+  </details>
+</div>

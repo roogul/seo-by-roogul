@@ -1,0 +1,30 @@
+{% import '_includes/forms' as forms %}
+
+<p class="light">{{ 'When an SEO value is left blank, these fields are checked in order and the first one with content is used. Enter field handles separated by commas.'|t('seo-by-roogul') }}</p>
+
+{{ forms.textField({
+  label: 'Title fallback fields'|t('seo-by-roogul'),
+  instructions: '`title` means the entry’s own title.'|t('seo-by-roogul'),
+  name: 'titleSources',
+  value: field.titleSources,
+  placeholder: 'title',
+  class: 'code',
+}) }}
+
+{{ forms.textField({
+  label: 'Description fallback fields'|t('seo-by-roogul'),
+  instructions: 'Text, rich text or CKEditor fields. HTML is stripped and the result trimmed to 160 characters.'|t('seo-by-roogul'),
+  name: 'descriptionSources',
+  value: field.descriptionSources,
+  placeholder: 'summary, excerpt, body',
+  class: 'code',
+}) }}
+
+{{ forms.textField({
+  label: 'Image fallback fields'|t('seo-by-roogul'),
+  instructions: 'Asset fields. The first image is used.'|t('seo-by-roogul'),
+  name: 'imageSources',
+  value: field.imageSources,
+  placeholder: 'heroImage, featuredImage',
+  class: 'code',
+}) }}

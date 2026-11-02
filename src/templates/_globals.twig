@@ -1,0 +1,159 @@
+{% extends '_layouts/cp' %}
+{% import '_includes/forms' as forms %}
+
+{% set title = 'SEO Globals'|t('seo-by-roogul') %}
+{% set selectedSubnavItem = 'globals' %}
+{% set fullPageForm = true %}
+
+{# Fallback hints for blank fields #}
+{% set fb = primaryGlobals ?? null %}
+{% set hint = fb ? 'Leave blank to use the primary site’s value.'|t('seo-by-roogul') : null %}
+
+{% block toolbar %}
+  {% if editableSites|length > 1 %}
+    <div class="select">
+      <select id="seobr-site-switch" aria-label="{{ 'Site'|t('app') }}">
+        {% for s in editableSites %}
+          <option value="{{ s.handle }}"{% if s.id == site.id %} selected{% endif %}>{{ s.name|t('site') }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% js %}
+      document.getElementById('seobr-site-switch').addEventListener('change', (e) => {
+        window.location.href = Craft.getCpUrl('seo-by-roogul/globals/' + e.target.value);
+      });
+    {% endjs %}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {{ actionInput('seo-by-roogul/globals/save') }}
+  {{ hiddenInput('siteId', site.id) }}
+  {{ redirectInput('seo-by-roogul/globals/' ~ site.handle) }}
+
+  {% namespace 'globals' %}
+
+    <h2>{{ 'Titles'|t('seo-by-roogul') }}</h2>
+
+    {{ forms.textField({
+      label: 'Site name'|t('seo-by-roogul'),
+      instructions: 'Used in titles, Open Graph and structured data.'|t('seo-by-roogul'),
+      name: 'siteName',
+      value: globals.siteName,
+      placeholder: fb ? fb.siteName : defaults.siteName,
+      errors: globals.getErrors('siteName'),
+    }) }}
+
+    {{ forms.textField({
+      label: 'Title template'|t('seo-by-roogul'),
+      instructions: 'Applied to every page title except the homepage. Use `{title}` and `{siteName}`.'|t('seo-by-roogul'),
+      name: 'titleTemplate',
+      value: globals.titleTemplate,
+      placeholder: fb ? fb.titleTemplate : defaults.titleTemplate,
+      class: 'code',
+      errors: globals.getErrors('titleTemplate'),
+    }) }}
+
+    <hr>
+    <h2>{{ 'Defaults'|t('seo-by-roogul') }}</h2>
+    <p class="light">{{ 'Used when an entry has no SEO value and nothing in its fallback fields.'|t('seo-by-roogul') }}</p>
+
+    {{ forms.textareaField({
+      label: 'Description'|t('seo-by-roogul'),
+      instructions: 'Aim for 120–160 characters.'|t('seo-by-roogul'),
+      name: 'description',
+      value: globals.description,
+      placeholder: fb ? fb.description : null,
+      rows: 3,
+      errors: globals.getErrors('description'),
+    }) }}
+
+    {{ forms.elementSelectField({
+      label: 'Share image'|t('seo-by-roogul'),
+      instructions: 'Cropped to 1200×630 for social sharing.'|t('seo-by-roogul') ~ (hint ? ' ' ~ hint : ''),
+      id: 'imageId',
+      name: 'imageId',
+      elementType: 'craft\\elements\\Asset',
+      elements: globals.getImage() ? [globals.getImage()] : [],
+      criteria: { kind: ['image'] },
+      limit: 1,
+      viewMode: 'large',
+    }) }}
+
+    {{ forms.textField({
+      label: 'X (Twitter) handle'|t('seo-by-roogul'),
+      name: 'twitterHandle',
+      value: globals.twitterHandle ? '@' ~ globals.twitterHandle : '',
+      placeholder: fb and fb.twitterHandle ? '@' ~ fb.twitterHandle : '@handle',
+      errors: globals.getErrors('twitterHandle'),
+      size: 20,
+    }) }}
+
+    <hr>
+    <h2>{{ 'Identity'|t('seo-by-roogul') }}</h2>
+    <p class="light">{{ 'Structured data that tells search engines who’s behind the site.'|t('seo-by-roogul') }}</p>
+
+    {{ forms.selectField({
+      label: 'Type'|t('seo-by-roogul'),
+      name: 'entityType',
+      value: globals.entityType,
+      options: [
+        { label: 'Organisation'|t('seo-by-roogul'), value: 'organization' },
+        { label: 'Person'|t('seo-by-roogul'), value: 'person' },
+      ],
+      errors: globals.getErrors('entityType'),
+    }) }}
+
+    {{ forms.textField({
+      label: 'Name'|t('seo-by-roogul'),
+      name: 'entityName',
+      value: globals.entityName,
+      placeholder: fb ? fb.entityName : 'Defaults to the site name'|t('seo-by-roogul'),
+      errors: globals.getErrors('entityName'),
+    }) }}
+
+    {{ forms.elementSelectField({
+      label: 'Logo or photo'|t('seo-by-roogul'),
+      instructions: hint,
+      id: 'entityLogoId',
+      name: 'entityLogoId',
+      elementType: 'craft\\elements\\Asset',
+      elements: globals.getEntityLogo() ? [globals.getEntityLogo()] : [],
+      criteria: { kind: ['image'] },
+      limit: 1,
+      viewMode: 'large',
+    }) }}
+
+    {{ forms.textareaField({
+      label: 'Social profiles'|t('seo-by-roogul'),
+      instructions: 'One URL per line, e.g. Instagram, LinkedIn, YouTube.'|t('seo-by-roogul'),
+      name: 'sameAs',
+      value: globals.sameAs,
+      placeholder: fb ? fb.sameAs : 'https://www.instagram.com/…',
+      rows: 4,
+      class: 'code',
+      errors: globals.getErrors('sameAs'),
+    }) }}
+
+    <hr>
+    <h2>{{ 'Indexing'|t('seo-by-roogul') }}</h2>
+
+    {{ forms.lightswitchField({
+      label: 'Hide this site from search engines'|t('seo-by-roogul'),
+      instructions: 'Adds noindex to every page on this site. Non-production environments are always hidden, whatever this is set to.'|t('seo-by-roogul'),
+      name: 'noindex',
+      on: globals.noindex,
+    }) }}
+
+    {{ forms.textareaField({
+      label: 'robots.txt'|t('seo-by-roogul'),
+      instructions: '`{sitemapUrl}` is replaced with this site’s sitemap URL. Non-production environments always get `Disallow: /`.'|t('seo-by-roogul'),
+      name: 'robotsTxt',
+      value: globals.robotsTxt,
+      placeholder: fb ? fb.robotsTxt : defaults.robotsTxt,
+      rows: 6,
+      class: 'code',
+    }) }}
+
+  {% endnamespace %}
+{% endblock %}
